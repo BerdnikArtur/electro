@@ -1,0 +1,204 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load shop_filters %}
+
+{% block content %}
+<!-- SECTION -->
+<div class="section">
+	<!-- container -->
+	<div class="container">
+		<!-- row -->
+		<div class="row">
+			<!-- ASIDE -->
+			<div id="aside" class="col-md-3">
+				<!-- aside Widget -->
+				<form method="post">
+				{% csrf_token %}
+				<div class="aside">
+					<h3 class="aside-title">Categories</h3>
+					<div class="store-filter clearfix">
+						<div class="store-sort">
+							<label>
+								Sort By:
+								<select class="input-select" name="sort_by">
+									<option value="count_of_selled" {% if select_option_sort_by == 'count_of_selled' %} selected {% endif %}>Popular</option>
+									<option value="price" {% if select_option_sort_by == 'price' %} selected {% endif %}>Price</option>
+									<option value="-time_updated" {% if select_option_sort_by == '-time_updated' %} selected {% endif %}>Hot Deals</option>
+								</select>
+							</label>
+						</div>
+					</div>
+					
+					<div class="checkbox-filter">
+						{% for i in category_aside %}
+						<div class="input-checkbox">
+							<input type="checkbox" id="category-{{ forloop.counter }}" value="{{ i.pk }}" name="category" {% if i.pk|stringformat:"s" in checkbox_categories %} checked {% endif %}>
+							<label for="category-{{ forloop.counter }}">
+								<span></span>
+								{{ i.name }}
+								<small>(120)</small>
+							</label>
+						</div>
+						{% endfor %}
+					</div>
+				</div>
+				<!-- /aside Widget -->
+
+				<!-- aside Widget -->
+				<div class="aside">
+					<h3 class="aside-title">Price</h3>
+					<div class="price-filter">
+						<div id="price-slider"></div>
+						<div class="input-number price-min">
+							{{ filters_aside.price__min }}
+							<span class="qty-up">+</span>
+							<span class="qty-down">-</span>
+						</div>
+						<span>-</span>
+						<div class="input-number price-max">
+							{{ filters_aside.price__max }}
+							<span class="qty-up">+</span>
+							<span class="qty-down">-</span>
+						</div>
+					</div>
+				</div>
+				<!-- /aside Widget -->
+
+				<!-- aside Widget -->
+				<div class="aside">
+					<h3 class="aside-title">Brand</h3>
+					<div class="checkbox-filter">
+						{% for i in brands %}
+						<div class="input-checkbox">
+							<input type="checkbox" id="brand-{{ forloop.counter }}" value="{{ i }}" name="brand" {% if i in checkbox_brands %} checked {% endif %}>
+							<label for="brand-{{ forloop.counter }}">
+								<span></span>
+								{{ i }}
+								<small>(578)</small>
+							</label>
+						</div>
+						{% endfor %}
+					</div>
+				</div>
+				<!-- /aside Widget -->
+
+				<div class="aside">
+					<button class="primary-btn cta-btn">Submit</a>
+				</div>
+			</form>
+			
+				<!-- aside Widget -->
+				<div class="aside">
+					<h3 class="aside-title">Top selling</h3>
+					{% for i in tablet_aside %}
+					<div class="product-widget">
+						<div class="product-img">
+							<img src="{{ i.image.url }}" alt="">
+						</div>
+						<div class="product-body">
+							<p class="product-category">{{ i.category }}</p>
+							<h3 class="product-name"><a href="{{ i.get_absolute_url }}">{{ i.name }}</a></h3>
+							{% if i.discount %}
+							<h4 class="product-price">${{ i|get_price_with_discount }} <del class="product-old-price">${{ i.price }}</del></h4>
+							{% else %}
+							<h4 class="product-price">${{ i.price }}</h4>
+							{% endif %}
+						</div>
+					</div>
+					{% endfor %}
+				</div>
+				<!-- /aside Widget -->
+			</div>
+			<!-- /ASIDE -->	
+
+			<!-- STORE -->
+			<div id="store" class="col-md-9">
+				
+				<!-- store products -->
+				<div class="row">
+					{% for i in object_list %}
+					<!-- product -->
+					<div class="col-md-4 col-xs-6">
+						<div class="product">
+							<div class="product-img">
+								<img src="{{ i.image.url }}" alt="">
+								<div class="product-label">
+									{% if i.discount %}
+									<span class="sale">-{{ i.discount }}%</span>
+									{% endif %}
+									{% if i|get_status_of_new %}
+									<span class="new">NEW</span>
+									{% endif %}
+								</div>
+							</div>
+							<div class="product-body">
+								<p class="product-category">{{ i.category }}</p>
+								<h3 class="product-name"><a href="{{ i.get_absolute_url }}">{{ i.name }}</a></h3>
+								{% if i.discount %}
+								<h4 class="product-price">${{ i|get_price_with_discount }} <del class="product-old-price">${{ i.price }}</del></h4>
+								{% else %}
+								<h4 class="product-price">${{ i.price }}</h4>
+								{% endif %}
+								{% if i.rating %}
+								<div class="product-rating">
+									{% for j in i.rating|int_to_range %}
+									<i class="fa fa-star"></i>
+									{% endfor %}
+								</div>
+								{% endif %}
+								<div class="product-btns">
+									<button class="add-to-wishlist" type-collection="WishListOrderProduct" item-pk="{{ i.pk }}" data-action-by-default="{% url 'add_to_wishlist' %}" csrf-token="{{ csrf_token }}"><i class="fa fa-heart-o"></i><span class="tooltipp">add to wishlist</span></button>
+									<button class="add-to-compare" data-product-url="{{ request|absolute_url:i }}" csrf-token="{{ csrf_token }}"><i class="fa fa-exchange"></i><span class="tooltipp">add to compare</span></button>
+									<button class="quick-view openModalButton" image-url="{{i.image.url}}" description="{{i.description}}"><i class="fa fa-eye"></i><span class="tooltipp">quick view</span></button>
+								</div>
+							</div>
+							<div class="add-to-cart">
+								<button default-color="{{i.color.0}}" default-size="{{i.product_sizes.all.0.pk}}" item-pk="{{ i.pk }}" data-action-by-default="{% url 'add_to_cart' %}" csrf-token="{{ csrf_token }}" type-collection="CartOrderProduct" class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
+							</div>
+						</div>
+					</div>
+					<!-- /product -->
+					{% endfor %}
+				</div>
+				<div id="modal" class="modal">
+					<span class="close">&times;</span>
+					<img class="modal-image" id="modal-image">
+					<div id="caption"></div>
+					<!--<div class="modal-content">
+						<span class="close">&times;</span>
+						<div class="modal-body">
+							<img id="modal-image" src="" alt="">
+						</div>
+					</div>-->
+				</div>
+				<!-- /store products -->
+
+				<!-- store bottom filter -->
+				<div class="store-filter clearfix">
+					<span class="store-qty">Showing 20-100 products</span>
+					<ul class="store-pagination">
+						{% if page_obj.has_previous %}
+						<li><a href="?page={{page_obj.previous_page_number}}"><i class="fa fa-angle-left"></i></a></li>
+						{% endif %}
+						{% for p in paginator.page_range %}
+							{% if page_obj.number == p %}
+							<li class="active">{{p}}</li>
+							{% elif p >= page_obj.number|add:-2 and p <= page_obj.number|add:2 %} 
+							<li><a href="?page={{p}}">{{p}}</a></li>  
+							{% endif %}
+						{% endfor %}
+						{% if page_obj.has_next %}
+						<li><a href="?page={{page_obj.next_page_number}}"><i class="fa fa-angle-right"></i></a></li>
+						{% endif %}
+					</ul> 
+				</div>
+				<!-- /store bottom filter -->
+			</div>
+			<!-- /STORE -->
+		</div>
+		<!-- /row -->
+	</div>
+	<!-- /container -->
+</div>
+<!-- /SECTION -->
+{% endblock %}

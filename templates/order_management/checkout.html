@@ -1,0 +1,208 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load shop_filters %}
+
+{% block content %}
+<!-- SECTION -->
+<div class="section">
+	<!-- container -->
+	<div class="container">
+		<!-- row -->
+		<div class="row">
+			<form action="{% url 'home' %}" method="post" id="credit-card-form">
+				{% csrf_token %}
+				<div class="col-md-7">
+					<!-- Billing Details -->
+					<div class="billing-details">
+						<div class="section-title">
+							<h3 class="title">Billing address</h3>
+						</div>
+						{% for i in form %}
+						{{ i.errors }}
+						<div class="form-group">
+							{{ i }}
+						</div>
+						{% endfor %}
+						<!--<div class="form-group">
+							<input class="input" type="text" name="first-name" placeholder="First Name">
+						</div>
+						<div class="form-group">
+							<input class="input" type="text" name="last-name" placeholder="Last Name">
+						</div>
+						<div class="form-group">
+							<input class="input" type="text" name="address" placeholder="Address">
+						</div>
+						<div class="form-group">
+							<input class="input" type="text" name="city" placeholder="City">
+						</div>
+						<div class="form-group">
+							<input class="input" type="text" name="country" placeholder="Country">
+						</div>
+						<div class="form-group">
+							<input class="input" type="text" name="zip-code" placeholder="ZIP Code">
+						</div>
+						<div class="form-group">
+							<input class="input" type="tel" name="tel" placeholder="Telephone">
+						</div>-->
+						<div class="form-group">
+							<div class="input-checkbox">
+								<input type="checkbox" id="create-account">
+								<label for="create-account">
+									<span></span>
+									Create Account?
+								</label>
+								<div class="caption">
+									<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt.</p>
+									<input class="input" type="password" name="password" placeholder="Enter Your Password">
+								</div>
+							</div>
+						</div>
+					</div>
+					<!-- /Billing Details -->
+
+					<div class="billing-details">
+						<div class="section-title">
+							<h3 class="title">Payment</h3>
+						</div>
+						<div class="card-form-container">
+							<div class="form-group" style="grid-area: number;">
+								<div id="cardNumber" class="input card-input"></div>
+							</div>
+							<div class="form-group" style="grid-area: expiration;">
+								<div id="cardExpiry" class="input card-input"></div> 
+							</div>
+							<div class="form-group" style="grid-area: security;">
+								<div id="cardCvc" class="input card-input"></div>
+							</div>
+						</div>
+					</div>
+
+					<!-- Shiping Details -->
+					<div class="shiping-details">
+						<div class="section-title">
+							<h3 class="title">Shiping address</h3>
+						</div>
+						<div class="input-checkbox">
+							<input type="checkbox" id="shiping-address">
+							<label for="shiping-address">
+								<span></span>
+								Ship to a diffrent address?
+							</label>
+							<div class="caption">
+								<div class="form-group">
+									<input class="input" type="text" name="first_name_ship" placeholder="First Name">
+								</div>
+								<div class="form-group">
+									<input class="input" type="text" name="last_name_ship" placeholder="Last Name">
+								</div>
+								<div class="form-group">
+									<input class="input" type="text" name="address_ship" placeholder="Address">
+								</div>
+								<div class="form-group">
+									<input class="input" type="text" name="city_ship" placeholder="City">
+								</div>
+								<div class="form-group">
+									<input class="input" type="text" name="state_ship" placeholder="State">
+								</div>
+								<div class="form-group">
+									<input class="input" type="text" name="country_ship" placeholder="Country">
+								</div>
+								<div class="form-group">
+									<input class="input" type="text" name="zip_code_ship" placeholder="ZIP Code">
+								</div>
+								<div class="form-group">
+									<input class="input" type="tel" name="telephone_ship" placeholder="Telephone">
+								</div>
+							</div>
+						</div>
+					</div>
+					<!-- /Shiping Details -->
+
+					<!-- Order notes -->
+					<div class="order-notes">
+						<textarea class="input" name="order_notes" placeholder="Order Notes"></textarea>
+					</div>
+					<!-- /Order notes -->
+				</div>
+
+				<!-- Order Details -->
+				<div class="col-md-5 order-details">
+					<div class="section-title text-center">
+						<h3 class="title">Your Order</h3>
+					</div>
+					<div class="order-summary">
+						<div class="order-col">
+							<div><strong>PRODUCT</strong></div>
+							<div><strong>TOTAL</strong></div>
+						</div>
+						<div class="order-products">
+							{% for i in cart_items %}
+							<div class="order-col">
+								<div>{{i.product.name}}</div>
+								{% if i.product.discount %}
+								<div>${{ i.product|get_price_with_discount }} <del class="product-old-price">${{ i.product.price }}</del></div>
+								{% else %}
+								<div>${{ i.product.price }}</div>
+								{% endif %}
+							</div>
+							{% endfor %}
+						</div>
+						<div class="order-col">
+							<div>Shiping</div>
+							<div><strong>FREE</strong></div>
+						</div>
+						<div class="order-col">
+							<div><strong>TOTAL</strong></div>
+							<div><strong class="order-total">${{ request.user.cart.total_price }}</strong></div>
+						</div>
+					</div>
+					<div class="payment-method">
+						<div class="input-radio">
+							<input type="radio" name="payment" id="payment-1">
+							<label for="payment-1">
+								<span></span>
+								Bank Transfer
+							</label>
+							<div class="caption">
+								<p>You can insert your card's data to pay for bargain</p>
+							</div>
+						</div>
+						<div class="input-radio">
+							<input type="radio" name="payment" id="payment-2">
+							<label for="payment-2">
+								<span></span>
+								Cheque Payment
+							</label>
+							<div class="caption">
+								<p>This option doesn't work yet</p>
+							</div>
+						</div>
+						<div class="input-radio">
+							<input type="radio" name="payment" id="payment-3">
+							<label for="payment-3">
+								<span></span>
+								Paypal System
+							</label>
+							<div class="caption">
+								<p>This option doesn't work yet</p>
+							</div>
+						</div>
+					</div>
+					<div class="input-checkbox">
+						<input type="checkbox" id="terms">
+						<label for="terms">
+							<span></span>
+							I've read and accept the <a href="#">terms & conditions</a>
+						</label>
+					</div>
+					<button type="submit" id="order-button" class="primary-btn order-submit">Place order</button>
+				</div>
+				<!-- /Order Details -->
+			</form>
+		</div>
+		<!-- /row -->
+	</div>
+	<!-- /container -->
+</div>
+<!-- /SECTION -->
+{% endblock %}

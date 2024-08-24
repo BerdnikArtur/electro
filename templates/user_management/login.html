@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- SECTION -->
+<div class="section">
+	<!-- container -->
+	<div class="container">
+		<!-- row -->
+		<div class="row">
+			<div class="col-md-7">
+			<form method="post">
+				{% csrf_token %}
+				<!-- Log up form -->
+				<div class="billing-details">
+					<div class="section-title">
+						<h3 class="title">Login user</h3>
+					</div>
+					<div><p>{{ form.non_field_errors }}</p></div>
+					{% for i in form %}
+					<div class="form-group">
+						{{ i }}
+					</div>
+					{{ i.errors }}
+					{% endfor %}
+				</div>
+				<div class="aside">
+					<button type="submit" class="primary-btn cta-btn">Log in</a>
+				</div>
+				<!-- Log up form -->
+			</form>
+			</div>
+		</div>
+		<!-- /row -->
+	</div>
+	<!-- /container -->
+</div>
+<!-- /SECTION -->
+{% endblock %}
+

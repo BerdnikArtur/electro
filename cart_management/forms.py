@@ -12,6 +12,7 @@ class BaseProductForm(forms.ModelForm):
         if self.object is not None:
             self._populate_product_fields()
 
+
     def _populate_product_fields(self):
         product_sizes = self.object.product_sizes.all() #seperate sql requests for cart and wishlist model
         self.fields['size'].choices = [(option.id, option.size) for option in product_sizes]

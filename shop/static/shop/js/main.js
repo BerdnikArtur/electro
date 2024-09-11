@@ -387,7 +387,7 @@
 	});
 
 	$(document).ready(function() {
-		$(".add-to-cart-btn").on("click", function(e) {
+		$(".add-to-cart-flag").on("click", function(e) {
 			e.preventDefault();
 
 			localStorage.setItem('scrollPosition', window.scrollY);

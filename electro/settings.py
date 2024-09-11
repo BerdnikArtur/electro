@@ -65,7 +65,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
     'debug_toolbar.middleware.DebugToolbarMiddleware',
-    'electro.middleware.CacheMiddleware',
+    #'electro.middleware.CacheMiddleware',
 ]
 #'electro.middleware.MainCacheMiddleware',
 
@@ -213,8 +213,6 @@ INTERNAL_IPS = [
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        #'rest_framework.authentication.SessionAuthentication',
-        #'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.TokenAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [

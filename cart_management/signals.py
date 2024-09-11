@@ -24,16 +24,14 @@ def create_user_cart(sender, instance, created, **kwargs):
         Cart.objects.create(customer=instance)
         WishList.objects.create(customer=instance)
 
+
 @receiver(post_save, sender=WishListOrderProduct)
 @receiver(post_save, sender=CartOrderProduct)
 def update_cart(sender, instance, created, **kwargs):
     if created:
         if isinstance(instance, WishListOrderProduct):
             item_collection = instance.wishlist
+            WishList.objects.update_total_price_and_quantity(item_collection, price=instance.product.get_price_with_discount(), qty=instance.qty)
         elif isinstance(instance, CartOrderProduct):
             item_collection = instance.cart
-        else:
-            # Handle the case where the instance is neither a CartOrderProduct nor a WishListOrderProduct
-            return
-        price = instance.product.get_price_with_discount()
-        item_collection.update_total_price_and_quantity(price=price, qty=instance.qty)
+            Cart.objects.update_total_price_and_quantity(item_collection, price=instance.product.get_price_with_discount(), qty=instance.qty)

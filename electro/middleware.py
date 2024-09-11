@@ -3,6 +3,8 @@ from django.core.cache import cache
 from django.http import HttpResponse, FileResponse
 from django.utils.deprecation import MiddlewareMixin
 
+from django.middleware.csrf import get_token
+
 class MainCacheMiddleware(MiddlewareMixin):
     """
     Middleware for caching querysets based on request URL and query parameters.
@@ -100,36 +102,44 @@ class FullPageCacheMiddleware:
 
 class CacheMiddleware(MiddlewareMixin):
     def process_request(self, request):
-        # Exclude admin URLs and API URLs from caching
         if request.path.startswith('/admin/') or request.path.startswith('/api/'):
             return None
+        
+        if request.method != 'GET':
+            self.clear_cache(request)
 
-        # Only cache GET requests
         if request.method == 'GET':
             cache_key = self.get_cache_key(request)
             cached_response = cache.get(cache_key)
             if cached_response:
                 return cached_response
 
-        # Proceed with the request if it's not cached or if it's a POST request
         return None
 
     def process_response(self, request, response):
-        # Exclude admin URLs and API URLs from caching
         if request.path.startswith('/admin/') or request.path.startswith('/api/'):
             return response
 
-        # Only cache GET requests
+
         if request.method == 'GET':
-            # Check if the response is a JSON response and cache it properly
-            if isinstance(response, JsonResponse):
-                # JSON responses should be cached with their content
-                cache_key = self.get_cache_key(request)
-                cache.set(cache_key, response, timeout=60*15)  # Cache for 15 minutes
+            # Check if the response contains a CSRF token and avoid caching
+            csrf_token = get_token(request)
+            if csrf_token in response.cookies:
+                # CSRF token found, don't cache this response
+                return response
             else:
-                # For other responses (like HTML), cache the response
+                # Cache JSON and other responses for 15 minutes
                 cache_key = self.get_cache_key(request)
-                cache.set(cache_key, response, timeout=60*15)  # Cache for 15 minutes
+                #cache.set(cache_key, response, timeout=60 * 15)
+        
+
+        # if request.method == 'GET':
+        #     if isinstance(response, JsonResponse):
+        #         cache_key = self.get_cache_key(request)
+        #         cache.set(cache_key, response, timeout=60*15)
+        #     else:
+        #         cache_key = self.get_cache_key(request)
+        #         cache.set(cache_key, response, timeout=60*15)  
 
         return response
     
@@ -137,4 +147,9 @@ class CacheMiddleware(MiddlewareMixin):
         # Generate a unique key based on the request URL and query parameters
         url = request.build_absolute_uri()  # Get the full URL including query parameters
         return hashlib.md5(force_bytes(url)).hexdigest()
+    
+    def clear_cache(self, request):
+        """Clear cache related to the current URL."""
+        cache_key = self.get_cache_key(request)
+        cache.delete(cache_key)
 

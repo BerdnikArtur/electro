@@ -5,18 +5,18 @@ from django.forms import BaseForm
 
 from ..models import *
 
-from shop.services.services import get_header_and_footer
+from utils.services.base_service import BaseService
 from payment_management.services import stripe_service
 from .shippo_services import ShippoService
 
 
-class CheckoutService:
-    @staticmethod
-    def get_context_data(request: HttpRequest, context: dict[str: Any]) -> dict[str: Any]:
-        return {**get_header_and_footer(request), **context}
+class CheckoutService(BaseService):
     
-    @staticmethod
-    def form_valid(request: HttpRequest, form: BaseForm):
+    def get_context_data(self, request: HttpRequest, context: dict[str: Any]) -> dict[str: Any]:
+        return {**self.get_header_and_footer(request), **context}
+    
+    
+    def form_valid(self, request: HttpRequest, form: BaseForm):
         intent = stripe_service.create_payment_intent(request.user.cart.total_price)
         order = Order.objects.create(
             user=request.user,
